@@ -2,40 +2,45 @@
 
 # =============================================
 # Git Progress Uploader for Coding Interview University
-# Version: 1.2 (clean)
+# Version: 1.3 (Andromeda Theme)
 # =============================================
 
 # Configuration
 REPO_DIR="/home/krobus/coding-interview-university"
 DEFAULT_COMMIT_MSG="Updated study progress"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
+# Andromeda VS Code Theme Colors
+BACKGROUND='\033[48;2;25;27;38m'
+FOREGROUND='\033[38;2;171;178;191m'
+TEXT='\033[38;2;171;178;191m'
+BLUE='\033[38;2;122;162;247m'
+CYAN='\033[38;2;96;220;227m'
+GREEN='\033[38;2;158;206;106m'
+YELLOW='\033[38;2;224;175;104m'
+ORANGE='\033[38;2;247;140;108m'
+PURPLE='\033[38;2;187;154;246m'
+RED='\033[38;2;237;121;121m'
 NC='\033[0m' # No Color
 
 function show_header() {
-    echo -e "${CYAN}╔════════════════════════════════════╗"
-    echo -e "║   Study Progress Git Uploader      ║"
-    echo -e "╚════════════════════════════════════╝${NC}"
+    echo -e "${PURPLE}╔════════════════════════════════════════════╗"
+    echo -e "║${BACKGROUND}         🚀 Git Progress Uploader           ${NC}${PURPLE}║"
+    echo -e "╚════════════════════════════════════════════╝${NC}"
     echo
 }
 
 function check_changes() {
-    echo -e "${BLUE}🔍 Checking for changes...${NC}"
+    echo -e "${BLUE}🔍 Scanning working directory...${NC}"
     changes=$(git status --porcelain)
     
     if [ -z "$changes" ]; then
-        echo -e "${YELLOW}⚠ No changes detected in your working directory.${NC}"
-        echo -e "   Make sure you've saved all files before running this script."
+        echo -e "${ORANGE}⚠ No changes detected${NC}"
+        echo -e "${TEXT}   Make sure you've saved all files before running this script.${NC}"
         exit 0
     else
-        echo -e "${GREEN}✓ Changes detected:${NC}"
+        echo -e "${GREEN}✓ Changes found:${NC}"
         git status -s | while read -r line; do
-            echo -e "   ${CYAN}•${NC} $line"
+            echo -e "   ${CYAN}➤${NC} ${TEXT}$line${NC}"
         done
         echo
     fi
@@ -45,41 +50,50 @@ function main() {
     show_header
     
     cd "$REPO_DIR" || {
-        echo -e "${RED}✗ Error: Could not change to repository directory.${NC}"
+        echo -e "${RED}✗ Critical Error: Could not access repository${NC}"
+        echo -e "${TEXT}   Path: ${ORANGE}$REPO_DIR${NC}"
         exit 1
     }
 
     check_changes
 
     # Commit message
-    echo -e "${BLUE}💬 Describe your progress (press Enter for default):${NC}"
-    echo -e "   Default: \"${YELLOW}${DEFAULT_COMMIT_MSG}${NC}\""
-    read -r -p "   > " commit_message
+    echo -e "${BLUE}💬 Progress Description:${NC}"
+    echo -e "${TEXT}   Press Enter for default message${NC}"
+    echo -e "${YELLOW}   Default: \"${DEFAULT_COMMIT_MSG}\"${NC}"
+    echo -ne "${CYAN}   ➤ ${BLUE}"  # Cursor styling
+    read -r -p "" commit_message
     
     [ -z "$commit_message" ] && commit_message="$DEFAULT_COMMIT_MSG"
 
     # Confirmation
-    echo -e "\n${BLUE}⚠ The following changes will be uploaded:${NC}"
+    echo -e "\n${BLUE}⚠ Review Changes:${NC}"
     git status -s
-    echo
-    read -r -p "Are you sure you want to continue? [y/N] " response
+    echo -e "\n${YELLOW}This action will:${NC}"
+    echo -e "   ${CYAN}1.${NC} Stage all changes"
+    echo -e "   ${CYAN}2.${NC} Create commit: ${GREEN}\"$commit_message\"${NC}"
+    echo -e "   ${CYAN}3.${NC} Push to origin/main"
+    echo -ne "\n${PURPLE}Confirm upload? [y/N] ${NC}"
+    read -r -p "" response
     
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-        echo -e "\n${BLUE}🚀 Uploading your progress...${NC}"
+        echo -e "\n${BLUE}🚀 Launching upload sequence...${NC}"
         
-        echo -e "${CYAN}1. Staging changes...${NC}"
+        echo -e "${CYAN}⌛ Staging changes...${NC}"
         git add .
         
-        echo -e "${CYAN}2. Creating commit...${NC}"
+        echo -e "${CYAN}✍ Committing...${NC}"
         git commit -m "$commit_message"
         
-        echo -e "${CYAN}3. Pushing to GitHub...${NC}"
+        echo -e "${CYAN}📤 Pushing...${NC}"
         git push origin main
         
-        echo -e "\n${GREEN}🎉 Success! Your progress has been uploaded.${NC}"
-        echo -e "   ${YELLOW}Commit message:${NC} \"$commit_message\""
+        echo -e "\n${GREEN}🎉 Mission accomplished!${NC}"
+        echo -e "${TEXT}   Your study progress is now safe on GitHub${NC}"
+        echo -e "   ${YELLOW}Commit ID:${NC} ${TEXT}$(git rev-parse --short HEAD)${NC}"
     else
-        echo -e "\n${RED}✗ Operation cancelled. No changes were uploaded.${NC}"
+        echo -e "\n${RED}✗ Operation aborted${NC}"
+        echo -e "${TEXT}   No changes were uploaded${NC}"
     fi
 }
 
